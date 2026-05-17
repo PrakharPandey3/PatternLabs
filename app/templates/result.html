@@ -40,11 +40,12 @@
             <div class="chart-grid-bg">
                 <div class="axis-labels bottom">Numbers Tested</div>
                 <div class="axis-labels left">Results</div>
-                
+
                 {% if chart_data %}
                 <div class="bars-container">
                     {% for data in chart_data %}
-                    <div class="chart-bar {% if data.result %}bar-true{% else %}bar-false{% endif %} group" style="height: {{ data.height }}%">
+                    <div class="chart-bar {% if data.result %}bar-true{% else %}bar-false{% endif %} group"
+                        style="height: {{ data.height }}%">
                         <div class="tooltip">
                             <div>#{{ data.number }}</div>
                             <div class="{% if data.result %}text-emerald{% else %}text-red{% endif %}">
@@ -55,18 +56,31 @@
                     {% endfor %}
                 </div>
                 {% else %}
-                <div class="empty-chart-message">Choose one of the example conjectures to run a supported deterministic check.</div>
+                <div class="empty-chart-message">Choose one of the example conjectures to run a supported deterministic
+                    check.</div>
                 {% endif %}
             </div>
         </div>
 
         <div class="chart-box">
             <h3 class="chart-title text-center">True vs False</h3>
-            
+
             <div class="donut-container">
                 <svg viewBox="0 0 100 100" class="donut-svg">
-                    <circle class="donut-ring" cx="50" cy="50" r="40" fill="transparent" stroke="#ef4444" stroke-width="20"></circle>
-                    <circle class="donut-segment" cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="20" stroke-dasharray="{{ ((true_count / tested) * 251.2) if tested else 0 }} 251.2" stroke-dashoffset="62.8"></circle>
+                    {% if false_count == 0 %}
+                    <circle cx="50" cy="50" r="40" fill="transparent" stroke="#10b981" stroke-width="20">
+                    </circle>
+                    {% else %}
+                    <circle class="donut-ring" cx="50" cy="50" r="40" fill="transparent" stroke="#ef4444"
+                        stroke-width="20">
+                    </circle>
+
+                    <circle class="donut-segment" cx="50" cy="50" r="40" fill="transparent" stroke="#10b981"
+                        stroke-width="20"
+                        stroke-dasharray="{{ ((true_count / tested) * 251.2) if tested else 0 }} 251.2"
+                        transform="rotate(-90 50 50)">
+                    </circle>
+                    {% endif %}
                 </svg>
                 <div class="donut-center-text">
                     <div class="text-3xl text-white">{{ tested }}</div>
@@ -75,8 +89,14 @@
             </div>
 
             <div class="legend">
-                <div class="legend-item"><span class="dot bg-emerald glow-dot-emerald"></span> <span class="text-muted">True: {{ true_count }}</span></div>
-                <div class="legend-item"><span class="dot bg-red glow-dot-red"></span> <span class="text-muted">False: {{ false_count }}</span></div>
+                <div class="legend-item"><span class="dot bg-emerald glow-dot-emerald"></span> <span
+                        class="text-muted">True: {{ true_count }}</span></div>
+                {% if false_count > 0 %}
+                <div class="legend-item">
+                    <span class="dot bg-red glow-dot-red"></span>
+                    <span class="text-muted">False: {{ false_count }}</span>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
