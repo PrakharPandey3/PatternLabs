@@ -55,7 +55,7 @@ def sieve(limit: int) -> list[int]:
     return [number for number, prime in enumerate(is_prime_number) if prime]
 
 
-PRIMES = sieve(200000)
+PRIMES = sieve(500000)
 PRIME_SET = set(PRIMES)
 
 
@@ -109,25 +109,28 @@ def format_result(theorem: str, results: list[tuple[int, bool]], analysis_note: 
         "analysis_note": analysis_note,
     }
 
-
 def analyze_goldbach(theorem: str) -> dict:
     results = []
 
-    for number in range(4, TEST_LIMIT + 1, 2):
-        found_pair = satisfies_goldbach(number)
-        results.append((number, found_pair))
+    for number in range(1, TEST_LIMIT + 1):
+        if number > 2 and number % 2 == 0:
+            found_pair = satisfies_goldbach(number)
+            results.append((number, found_pair))
+        else:
+            results.append((number, False))
 
     return format_result(
         theorem,
         results,
-        f"Checked every even integer from 4 through {TEST_LIMIT}.",
+        f"Checked every integer from 1 through {TEST_LIMIT} for Goldbach behavior.",
     )
 
 
 def satisfies_goldbach(number: int) -> bool:
     for prime in PRIMES:
         if prime > number // 2:
-            return False
+            break
+
         if (number - prime) in PRIME_SET:
             return True
 
@@ -135,52 +138,72 @@ def satisfies_goldbach(number: int) -> bool:
 
 
 def analyze_twin_primes(theorem: str) -> dict:
-    candidates = [prime for prime in PRIMES if prime + 2 <= TEST_LIMIT]
-    results = [(prime, (prime + 2) in PRIME_SET) for prime in candidates]
+    results = []
+
+    for number in range(1, TEST_LIMIT + 1):
+        is_twin = (
+            number in PRIME_SET
+            and (number + 2) in PRIME_SET
+        )
+
+        results.append((number, is_twin))
 
     return format_result(
         theorem,
         results,
-        f"Checked every prime p where p + 2 is at most {TEST_LIMIT}.",
+        f"Checked every integer from 1 through {TEST_LIMIT} for twin prime behavior.",
     )
-
 
 def analyze_fermat_numbers(theorem: str) -> dict:
     results = []
 
-    for exponent in range(6):
-        fermat_number = (2 ** (2**exponent)) + 1
-        results.append((exponent, is_prime(fermat_number)))
+    for number in range(1, TEST_LIMIT + 1):
+        is_fermat = False
+
+        for exponent in range(6):
+            fermat_number = (2 ** (2**exponent)) + 1
+
+            if number == fermat_number:
+                is_fermat = is_prime(fermat_number)
+                break
+
+        results.append((number, is_fermat))
 
     return format_result(
         theorem,
         results,
         (
-            "Checked primality for F_0 through F_5; larger Fermat numbers "
-            "grow too quickly for this lightweight tester."
+            f"Checked integers from 1 through {TEST_LIMIT} "
+            "against known Fermat numbers."
         ),
     )
 
 
 def analyze_prime_approximation(theorem: str) -> dict:
-    first_10000_primes = PRIMES[:TEST_LIMIT]
     results = []
 
-    for index, prime in enumerate(first_10000_primes, start=1):
-        if index == 1:
-            results.append((index, False))
+    for number in range(1, TEST_LIMIT + 1):
+        if number >= len(PRIMES):
+            results.append((number, False))
             continue
 
-        approximation = index * math.log(index)
+        prime = PRIMES[number - 1]
+
+        if number == 1:
+            results.append((number, False))
+            continue
+
+        approximation = number * math.log(number)
         relative_error = abs(prime - approximation) / prime
-        results.append((index, relative_error <= 0.20))
+
+        results.append((number, relative_error <= 0.20))
 
     return format_result(
         theorem,
         results,
         (
-            "Checked whether n ln(n) estimates the nth prime within 20% for "
-            "the first 10,000 primes."
+            f"Checked prime approximation accuracy for indices "
+            f"1 through {TEST_LIMIT}."
         ),
     )
 
